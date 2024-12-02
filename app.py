@@ -8,29 +8,16 @@ from flask_cors import CORS
 import os
 import mediapipe as mp
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3001"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['CORS_METHODS'] = "GET,POST,OPTIONS"
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["https://youspin-12433d075a43.herokuapp.com/"]}})
-
 # Load the pre-trained face detection model
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
 mp_selfie_segmentation = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
 base_image_path = r"spin1.png"
 base_image = cv2.imread(base_image_path)
-@app.route("/process-image", methods=["OPTIONS"])
-def handle_options():
-    response = jsonify({"message": "CORS preflight passed"})
-    response.headers.add("Access-Control-Allow-Origin", "https://youspin-12433d075a43.herokuapp.com")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-    return response
-@app.after_request
-def apply_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = 'https://youspin-12433d075a43.herokuapp.com'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    return response
+@app.route("/process-image", methods=["POST"])
 def process_image():
     try:
         # Receive the base64 image from the frontend
