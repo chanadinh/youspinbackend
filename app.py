@@ -8,10 +8,11 @@ from flask_cors import CORS
 import os
 import mediapipe as mp
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["https://youspin-12433d075a43.herokuapp.com/"]}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['CORS_METHODS'] = "GET,POST,OPTIONS"
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["https://youspin-12433d075a43.herokuapp.com/"]}})
+
 # Load the pre-trained face detection model
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
 mp_selfie_segmentation = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
