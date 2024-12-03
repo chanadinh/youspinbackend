@@ -8,15 +8,13 @@ from flask_cors import CORS
 import mediapipe as mp
 app = Flask(__name__)
 CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
-app.config['CORS_METHODS'] = "GET,POST,OPTIONS"
-app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+
 # Load the pre-trained face detection model
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
 mp_selfie_segmentation = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
 base_image_path = r"spin1.png"
 base_image = cv2.imread(base_image_path)
-@app.route("/process-image", methods=["POST"])
+@app.route("/", methods=["POST"])
 def process_image():
     try:
         # Receive the base64 image from the frontend
