@@ -17,7 +17,7 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 mp_selfie_segmentation = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
 base_image_path = r"spin1.png"
 base_image = cv2.imread(base_image_path)
-@app.route("/process-image", methods=["POST"])
+@app.route("/", methods=["POST"])
 def process_image():
     try:
         # Receive the base64 image from the frontend
