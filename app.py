@@ -8,7 +8,7 @@ from flask_cors import CORS
 import os
 import mediapipe as mp
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 # app.config['CORS_HEADERS'] = 'Content-Type'
 # app.config['CORS_METHODS'] = "GET,POST,OPTIONS"
 # app.config['CORS_SUPPORTS_CREDENTIALS'] = True
