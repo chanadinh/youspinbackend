@@ -5,16 +5,15 @@ import base64
 import cv2
 import numpy as np
 from flask_cors import CORS
-import mediapipe as mp
 app = Flask(__name__)
 CORS(app)
 
 # Load the pre-trained face detection model
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
-mp_selfie_segmentation = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
 base_image_path = r"spin1.png"
-base_image = cv2.imread(base_image_path)
-@app.route("/", methods=["POST"])
+base_image = cv2.imread(base_image_path, cv2.IMREAD_UNCHANGED)
+base_image = cv2.cvtColor(base_image, cv2.COLOR_BGR2BGRA)
+@app.route("/process-image", methods=["POST"])
 def process_image():
     try:
         # Receive the base64 image from the frontend
@@ -26,13 +25,23 @@ def process_image():
         # Decode the base64 image
         image_data = base64.b64decode(image_base64.split(",")[1])
         image = Image.open(io.BytesIO(image_data))
+
+        # Convert the image to a NumPy array
         image_np = np.array(image)
+
+        # Check the size of the image
+        height, width = image_np.shape[:2]
+
+        # Reduce the resolution to half if the image is large (e.g., width > 1000 or height > 1000)
+        if width > 2000 or height > 2000:
+            image_np = cv2.resize(image_np, (width // 2, height // 2))
 
         # Convert image to grayscale for face detection
         gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
 
         # Detect faces
         faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
 
         # Crop faces and return the first detected face
         cropped_face = None
@@ -88,7 +97,8 @@ def process_image():
                 for j in range(w):
                     # Get the pixel of the resized face and the alpha value (transparency)
                     if resized_face[i, j, 3] > 0:  # Only overwrite non-transparent pixels
-                        base_image_copy[y + i, x + j] = resized_face[i, j, :3]  # Replace the RGB value
+                        base_image_copy[y + i, x + j, :3] = resized_face[i, j, :3]  # Replace RGB
+                        base_image_copy[y + i, x + j, 3] = resized_face[i, j, 3]    # Replace Alpha
             # Convert the processed image (cropped face) to base64
             _, buffer = cv2.imencode(".png", base_image_copy)
             processed_image_base64 = base64.b64encode(buffer).decode("utf-8")
@@ -102,4 +112,4 @@ def process_image():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
